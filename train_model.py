@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
+import numpy as np
 
 # API call
 seasons = list(range(2010, 2025))
@@ -72,7 +73,7 @@ mapping = {None: 'draw', True: 'win', False: 'loss'}
 df_cleaned['home_winner'] = df_cleaned['home_winner'].replace(mapping)
 df_cleaned = df_cleaned.rename(columns={'home_winner': 'result'})
 df_cleaned = df_cleaned[['year', 'month', 'day', 'hour', 'minute', 'venue', 'city', 'round', 'league', 'home_team', 'away_team', 'referee', 'result']]
-df_cleaned.to_csv("df_cleaned.csv", index=False)
+df_cleaned.to_csv("dump/df_cleaned.csv", index=False)
 
 # Label encoding
 df_final = df_cleaned.copy()
@@ -89,8 +90,8 @@ X_train_val, X_holdout, y_train_val, y_holdout = train_test_split(X, y, test_siz
 X_train, X_test, y_train, y_test = train_test_split(X_train_val, y_train_val, test_size=0.20, random_state=42)
 
 # Sla de data op
-X_holdout.to_csv("X_holdout.csv", index=False)
-y_holdout.to_csv("y_holdout.csv", index=False)
+X_holdout.to_csv("dump/X_holdout.csv", index=False)
+y_holdout.to_csv("dump/y_holdout.csv", index=False)
 
 # K-fold cross validation
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
@@ -121,23 +122,18 @@ print(f'Accuracy: {accuracy:.2f}')
 print(classification_report(y_test, y_pred))
 
 # Sla model en encoder op
-joblib.dump(best_rf, 'best_rf_model.pkl')
-joblib.dump(encoder, 'label_encoder.pkl')
-
-# Maak een confusion matrix
-matrix = confusion_matrix(y_test, y_pred)
-sns.heatmap(matrix, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=['draw', 'loss', 'win'], yticklabels=['draw', 'loss', 'win'])
-plt.title('Confusion Matrix')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-plt.savefig("graphs/confusion_matrix.png")
-plt.show()
+joblib.dump(best_rf, 'dump/best_rf_model.pkl')
+joblib.dump(encoder, 'dump/label_encoder.pkl')
 
 # Maak een feature importance plot
 df_importances = pd.DataFrame({'feature': X.columns,'importance': best_rf.feature_importances_})
 df_importances = df_importances.sort_values('importance', ascending=True)
-plt.figure(figsize=(10,5))
-sns.barplot(x='importance', y='feature', data=df_importances)
-plt.title('Feature Importances')
-plt.savefig("graphs/feature_importances.png")
-plt.show()
+
+# Save df_importances to csv
+df_importances.to_csv("dump/df_importances.csv", index=False)
+
+# Maak een confusion matrix
+matrix = confusion_matrix(y_test, y_pred)
+
+# Save matrix 
+np.save('dump/confusion_matrix.npy', matrix)

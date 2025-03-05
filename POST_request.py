@@ -3,7 +3,7 @@ import json
 import requests
 
 # Laad de holdout data in
-X_holdout = pd.read_csv('X_holdout.csv')  
+X_holdout = pd.read_csv('dump/X_holdout.csv')  
 
 # Selecteer een willekeurige sample uit de holdout data
 sample = X_holdout.sample(n=1).iloc[0].to_dict()

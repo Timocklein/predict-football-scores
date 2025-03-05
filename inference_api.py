@@ -24,7 +24,7 @@ class FixtureInput(BaseModel):
 app = FastAPI()
 
 # Laad het getrainde model
-model = joblib.load('best_rf_model.pkl')
+model = joblib.load('dump/best_rf_model.pkl')
 
 # Definieer een API endpoint voor het maken van voorspellingen
 @app.post("/predict")
